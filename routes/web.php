@@ -29,3 +29,4 @@ Route::post('/contact', function(Request $request) {
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 Route::post('/projects', [ProjectController::class, 'store'])->name('projects.store');
+Route::delete('/projects/{project}', [ProjectController::class, 'destroy'])->name('project.destroy');

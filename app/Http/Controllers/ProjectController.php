@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Project;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class ProjectController extends Controller
@@ -19,5 +20,14 @@ class ProjectController extends Controller
         Project::create($validated);
 
         return redirect()->route('dashboard');
+    }
+
+    public function destroy(Project $project): RedirectResponse
+    {
+        $project->delete();
+
+        return redirect()
+            ->route('dashboard')
+            ->with('success', 'Project deleted successfully.');
     }
 }
