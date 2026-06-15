@@ -1,5 +1,5 @@
 import { router, useForm } from "@inertiajs/react";
-import React from "react";
+import React, { useState } from "react";
 
 type project = {
     id: number;
@@ -11,26 +11,69 @@ type project = {
 
 type props = {
     projects: project[];
+    success?: string;
 }
 
-export default function Dashboard({ projects }: props) {
-    const { data, setData, errors, processing, post, reset } = useForm({
+export default function Dashboard({ projects, success }: props) {
+    const { data, setData, errors, processing, post, reset, put } = useForm({
         'name': '',
         'status': 'pending',
         'priority': 'medium',
         'due_date': '',
     })
 
+    function startEditing(project: project) {
+        setEditingId(project.id);
+
+        setData({
+            name: project.name,
+            status: project.status,
+            priority: project.priority,
+            due_date: project.due_date ?? '',
+        })
+    }
+
+    const [editingId, setEditingId] = useState<number | null>(null);
+
+    function cancelEdit() {
+        setEditingId(null)
+
+        setData({
+            'name': '',
+            'status': 'pending',
+            'priority': 'medium',
+            'due_date': '',
+        })
+    }
+
     function submit(e: React.FormEvent) {
         e.preventDefault()
-        post('/projects', {
-            onSuccess: () => reset(),
-        });
+
+        if (editingId !== null) {
+            put(`/projects/${editingId}`, {
+                onSuccess: () => {
+                    reset();
+                    setEditingId(null);
+                }
+            })
+        }
+
+        else {
+            post('/projects', {
+                onSuccess: () => reset(),
+            });
+        }
+
     }
 
     return (
         <div className="min-h-screen bg-slate-100 p-8">
             <h1 className="text-3xl font-bold text-slate-900">Projects Dashboard</h1>
+            {success && (
+                <div className="mt-4 rounded bg-green-100 px-4 py-3 text-green-800">
+                    {success}
+                </div>
+            )}
             <form onSubmit={submit} className="mt-8 max-w-xl rounded-lg bg-white p-6 shadow">
                 <div className="mb-4">
                     <label className="mb-1 block text-sm font-medium">Project Name</label>
@@ -66,7 +109,7 @@ export default function Dashboard({ projects }: props) {
                     >
                         <option value="low">Low</option>
                         <option value="medium">Medium</option>
-                        <option value="High">High</option>
+                        <option value="high">High</option>
                     </select>
                     {errors.priority && <p className="mt-1 text-sm text-red-600">{errors.priority}</p>}
                 </div>
@@ -86,8 +129,20 @@ export default function Dashboard({ projects }: props) {
                     disabled={processing}
                     className="rounded bg-blue-600 px-4 py-2 text-white"
                 >
-                    {processing ? 'Saving...' : 'Create Project'}
+                    {processing ? 'Saving...' : editingId !== null ? 'Update Project' : 'Create Project'}
                 </button>
+
+                {
+                    editingId !== null && (
+                        <button
+                            onClick={cancelEdit}
+                            type="button"
+                            className="ml-2 rounded bg-slate-400 px-4 py-2 text-white"
+                        >
+                            Cancel
+                        </button>
+                    )}
+
             </form>
 
             <div className="mt-10">
@@ -100,12 +155,22 @@ export default function Dashboard({ projects }: props) {
                             <p>Status: {project.status}</p>
                             <p>Priority: {project.priority}</p>
                             <p>Due Date: {project.due_date ?? 'No due date'}</p>
-                            <button
-                                onClick={() => router.delete(`/projects/${project.id}`)}
-                                className="mt-2 rounded bg-red-600 px-3 py-1 text-white"
-                            >
-                                Delete
-                            </button>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => router.delete(`/projects/${project.id}`)}
+                                    className="mt-2 rounded bg-red-600 px-3 py-1 text-white"
+                                >
+                                    Delete
+                                </button>
+
+                                <button
+                                    className="mt-2 rounded bg-amber-500 px-3 py-1 text-white"
+                                    onClick={() => startEditing(project)}
+                                    type="button"
+                                >
+                                    Edit
+                                </button>
+                            </div>
                         </div>
                     ))}
                 </div>

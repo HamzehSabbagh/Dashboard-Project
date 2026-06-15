@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('status')->default('pending');
             $table->string('priority')->default('medium');
-            $table->date('due_date');
+            $table->date('due_date')->nullable();
             $table->timestamps();
         });
     }
