@@ -14,14 +14,14 @@ class ProjectController extends Controller
             'name' => ['required', 'min:3'],
             'status' => ['required'],
             'priority' => ['required'],
-            'due_date' => ['nullable', 'date']
+            'due_date' => ['nullable', 'date'],
         ]);
 
         Project::create($validated);
 
         return redirect()
-                ->route('dashboard')
-                ->with('success', "Project created successfully.");
+            ->route('dashboard')
+            ->with('success', 'Project created successfully.');
     }
 
     public function destroy(Project $project): RedirectResponse
@@ -33,7 +33,8 @@ class ProjectController extends Controller
             ->with('success', 'Project deleted successfully.');
     }
 
-    public function update(Request $request, Project $project): RedirectResponse{
+    public function update(Request $request, Project $project): RedirectResponse
+    {
         $validated = $request->validate([
             'name' => ['required', 'min:3'],
             'status' => ['required'],
@@ -45,6 +46,6 @@ class ProjectController extends Controller
 
         return redirect()
             ->route('dashboard')
-            ->with("success", "Project updated successfully.");
+            ->with('success', 'Project updated successfully.');
     }
 }
