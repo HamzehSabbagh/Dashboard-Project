@@ -10,7 +10,7 @@ class DashboardController extends Controller
 {
     public function index(): Response
     {
-        $projects = Project::query()->latest()->get();
+        $projects = Project::with('tasks')->latest()->get();
 
         return Inertia::render('dashboard', [
             'projects' => $projects,

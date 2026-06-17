@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Project;
 use App\Models\Task;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class TaskController extends Controller
@@ -20,15 +22,26 @@ class TaskController extends Controller
      */
     public function create()
     {
-        //
+        
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request, Project $project): RedirectResponse
     {
-        //
+        $validated = $request->validate([
+            'title' => ['required', 'min:3'],
+        ]);
+
+        $project->tasks()->create([
+            'title' => $validated['title'],
+            'is_completed' => false,
+        ]);
+
+        return redirect()
+            ->route('dashboard')
+            ->with('success', 'Task created successfully.');
     }
 
     /**
@@ -58,8 +71,21 @@ class TaskController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Task $task)
+    public function destroy(Task $task): RedirectResponse
     {
-        //
+        $task->delete();
+
+        return redirect()
+            ->route('dashboard')
+            ->with('success', 'Task deleted successfully');
+    }
+
+    public function toggle(Task $task): RedirectResponse
+    {
+        $task->update([
+            'is_completed' => ! $task->is_completed,
+        ]);
+
+        return redirect()->route('dashboard')->with('success', 'Task updated successfully.');
     }
 }

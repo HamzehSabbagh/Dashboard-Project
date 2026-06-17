@@ -7,11 +7,61 @@ type project = {
     status: string;
     priority: string;
     due_date: string | null;
+    tasks: task[];
+}
+
+type task = {
+    id: number;
+    project_id: number;
+    title: string;
+    is_completed: boolean;
 }
 
 type props = {
     projects: project[];
     success?: string;
+}
+
+type TaskFormProps = {
+    projectId: number;
+}
+
+function TaskForm({ projectId }: TaskFormProps) {
+    const { data, setData, processing, reset, errors, post } = useForm({
+        title: '',
+    })
+
+    function submit(e: React.FormEvent) {
+        e.preventDefault();
+
+        post(`/projects/${projectId}/tasks`, {
+            onSuccess: () => reset(),
+        })
+    }
+
+    return (
+        <form onSubmit={submit} className="mt-3 flex gap-2">
+            <input
+                type='text'
+                value={data.title}
+                onChange={(e) => setData('title', e.target.value)}
+                placeholder="New task title"
+                className="flex-1 rounded border px-3 py-2"
+            />
+
+            <button
+                type="submit"
+                disabled={processing}
+                className="rounded bg-emerald-600 px-3 py-2 text-white"
+            >
+                {processing ? 'Adding...' : "Add Task"}
+            </button>
+
+            {errors && (
+                <p className="text-sm text-red-600">{errors.title}</p>
+            )}
+        </form>
+    )
 }
 
 export default function Dashboard({ projects, success }: props) {
@@ -157,7 +207,11 @@ export default function Dashboard({ projects, success }: props) {
                             <p>Due Date: {project.due_date ?? 'No due date'}</p>
                             <div className="flex gap-2">
                                 <button
-                                    onClick={() => router.delete(`/projects/${project.id}`)}
+                                    onClick={() => {
+                                        if (confirm(`Delete project "${project.name}"?`)) {
+                                            router.delete(`/projects/${project.id}`)
+                                        }
+                                    }}
                                     className="mt-2 rounded bg-red-600 px-3 py-1 text-white"
                                 >
                                     Delete
@@ -170,6 +224,43 @@ export default function Dashboard({ projects, success }: props) {
                                 >
                                     Edit
                                 </button>
+                            </div>
+                            <div className="mt-3">
+                                <p className="font-medium">Tasks</p>
+                                {project.tasks.length > 0 ? (
+                                    <ul className="mt-2 list-desc pl-5">
+                                        {project.tasks.map((task) => (
+                                            <li key={task.id} className="flex items-center justify-between gap-3">
+                                                <span>{task.title} - {task.is_completed ? 'Done' : 'Pending'}</span>
+
+                                                <div className="flex gap-2">
+                                                    <button
+                                                        type='button'
+                                                        onClick={() => router.patch(`/tasks/${task.id}/toggle`)}
+                                                        className="rounded bg-indigo-600 px-3 py-1 text-white"
+                                                    >
+                                                        {task.is_completed ? 'Mark Pending' : 'Mark Done'}
+                                                    </button>
+
+                                                    <button
+                                                        type='button'
+                                                        onClick={() => {
+                                                            if (confirm(`Delete task "${task.title}"`)) {
+                                                                router.delete(`/tasks/${task.id}`)
+                                                            }
+                                                        }}
+                                                        className="rounded bg-red-600 px-3 py-1 text-white"
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                </div>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                ) : (
+                                    <p className="text-sm text-slate-500">No tasks yet</p>
+                                )}
+                                <TaskForm projectId={project.id} />
                             </div>
                         </div>
                     ))}
