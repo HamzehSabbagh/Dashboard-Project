@@ -118,7 +118,18 @@ export default function Dashboard({ projects, success }: props) {
 
     return (
         <div className="min-h-screen bg-slate-100 p-8">
-            <h1 className="text-3xl font-bold text-slate-900">Projects Dashboard</h1>
+            <div className="flex items-center justify-between">
+                <h1 className="text-3xl font-bold text-slate-900">Projects Dashboard</h1>
+
+                <button
+                    type="button"
+                    onClick={() => router.post('/logout')}
+                    className="rounded bg-slate-800 px-4 py-2 text-white"
+                >
+                    Logout
+                </button>
+            </div>
+
             {success && (
                 <div className="mt-4 rounded bg-green-100 px-4 py-3 text-green-800">
                     {success}

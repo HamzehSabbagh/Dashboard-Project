@@ -17,7 +17,7 @@ class ProjectController extends Controller
             'due_date' => ['nullable', 'date'],
         ]);
 
-        Project::create($validated);
+        $request->user()->projects()->create($validated);
 
         return redirect()
             ->route('dashboard')
