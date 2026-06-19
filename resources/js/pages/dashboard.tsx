@@ -19,8 +19,17 @@ type task = {
 
 type props = {
     projects: project[];
-    success?: string;
-}
+    flash: {
+        success?: string;
+    };
+    auth: {
+        user: {
+            id: number;
+            name: string;
+            email: string;
+        };
+    };
+};
 
 type TaskFormProps = {
     projectId: number;
@@ -57,14 +66,14 @@ function TaskForm({ projectId }: TaskFormProps) {
                 {processing ? 'Adding...' : "Add Task"}
             </button>
 
-            {errors && (
+            {errors.title && (
                 <p className="text-sm text-red-600">{errors.title}</p>
             )}
         </form>
     )
 }
 
-export default function Dashboard({ projects, success }: props) {
+export default function Dashboard({ projects, flash, auth }: props) {
     const { data, setData, errors, processing, post, reset, put } = useForm({
         'name': '',
         'status': 'pending',
@@ -120,7 +129,9 @@ export default function Dashboard({ projects, success }: props) {
         <div className="min-h-screen bg-slate-100 p-8">
             <div className="flex items-center justify-between">
                 <h1 className="text-3xl font-bold text-slate-900">Projects Dashboard</h1>
-
+                <p className="text-lg text-slate-800 pr-40">
+                    Welcome, <span className="text-black font-semibold">{auth.user?.name}</span>
+                </p>
                 <button
                     type="button"
                     onClick={() => router.post('/logout')}
@@ -130,9 +141,9 @@ export default function Dashboard({ projects, success }: props) {
                 </button>
             </div>
 
-            {success && (
+            {flash.success && (
                 <div className="mt-4 rounded bg-green-100 px-4 py-3 text-green-800">
-                    {success}
+                    {flash.success}
                 </div>
             )}
             <form onSubmit={submit} className="mt-8 max-w-xl rounded-lg bg-white p-6 shadow">
@@ -239,9 +250,9 @@ export default function Dashboard({ projects, success }: props) {
                             <div className="mt-3">
                                 <p className="font-medium">Tasks</p>
                                 {project.tasks.length > 0 ? (
-                                    <ul className="mt-2 list-desc pl-5">
+                                    <ul className="mt-2 list-disc pl-5">
                                         {project.tasks.map((task) => (
-                                            <li key={task.id} className="flex items-center justify-between gap-3">
+                                            <li key={task.id} className="flex items-center justify-between gap-3 py-1">
                                                 <span>{task.title} - {task.is_completed ? 'Done' : 'Pending'}</span>
 
                                                 <div className="flex gap-2">

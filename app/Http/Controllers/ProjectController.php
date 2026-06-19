@@ -26,6 +26,8 @@ class ProjectController extends Controller
 
     public function destroy(Project $project): RedirectResponse
     {
+        $this->authorize('delete', $project);
+
         $project->delete();
 
         return redirect()
@@ -35,6 +37,8 @@ class ProjectController extends Controller
 
     public function update(Request $request, Project $project): RedirectResponse
     {
+        $this->authorize('update', $project);
+
         $validated = $request->validate([
             'name' => ['required', 'min:3'],
             'status' => ['required'],

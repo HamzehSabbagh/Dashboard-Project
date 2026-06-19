@@ -13,14 +13,20 @@ class Project extends Model
         'status',
         'priority',
         'due_date',
-        'user_id'
+        'user_id',
     ];
 
+    /**
+     *  @return HasMany<Task, $this>
+     */
     public function tasks(): HasMany
     {
         return $this->hasMany(Task::class);
     }
 
+    /**
+     *  @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

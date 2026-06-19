@@ -27,6 +27,8 @@ class TaskController extends Controller
      */
     public function store(Request $request, Project $project): RedirectResponse
     {
+        abort_if($request->user()->id !== $project->user_id, 403);
+
         $validated = $request->validate([
             'title' => ['required', 'min:3'],
         ]);
@@ -70,6 +72,8 @@ class TaskController extends Controller
      */
     public function destroy(Task $task): RedirectResponse
     {
+        $this->authorize('delete', $task);
+
         $task->delete();
 
         return redirect()
@@ -79,6 +83,8 @@ class TaskController extends Controller
 
     public function toggle(Task $task): RedirectResponse
     {
+        $this->authorize('update', $task);
+
         $task->update([
             'is_completed' => ! $task->is_completed,
         ]);
